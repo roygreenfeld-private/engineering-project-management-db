@@ -4,6 +4,23 @@ A SQL Server database for tracking engineering projects: who works on what, how 
 
 All people, projects, and activity in the dataset are fictional.
 
+## Project overview
+
+The database follows the life of a task in an engineering organization:
+
+1. **Plan:** a project gets a start date, an optional deadline, and a team of employees, each with a role on that project.
+2. **Assign:** each task goes to a member of the project team, with a priority, a status, and an optional deadline.
+3. **Work:** engineers log work records with the hours spent and the number of defects found.
+4. **Review:** a manager approves or rejects the task. A rejected task goes back for more work and another review.
+
+Triggers enforce the main business rules inside the database, so invalid data is rejected when it's written. This structure supports questions about workload, delivery, and quality, such as which projects are behind, who is overloaded, and how often work passes review the first time.
+
+The project has three parts:
+
+- **Database:** the schema and its business rules.
+- **Sample data:** a generated dataset of 13 projects, 30 employees, and 308 tasks, including deliberate patterns and edge cases.
+- **Validation:** an automated suite that rebuilds the database from scratch and checks both the data and the rules.
+
 ## Data model
 
 ![Entity relationship diagram of the engineering project management database](docs/erd.png)
@@ -106,12 +123,18 @@ This builds the database in a throwaway container, then runs the data checks and
 
 ## Repository layout
 
-| Path | Contents |
-|------|----------|
-| `database.sql` | Tables, constraints, and triggers |
-| `seed_data.sql` | Generated sample data |
-| `queries.sql` | Analytical queries, commented out; uncomment one to run it |
-| `scripts/generate_seed.py` | Sample data generator |
-| `validation/` | Validation script and its SQL checks |
-| `docs/VALIDATION.md` | Validation protocol |
-| `docs/erd.png` | Entity relationship diagram |
+```text
+.
+├── database.sql       Tables, constraints, and triggers
+├── seed_data.sql      Generated sample data
+├── queries.sql        Analytical queries, commented out; uncomment one to run it
+├── docs/              Validation protocol and entity relationship diagram
+├── scripts/           Sample data generator
+└── validation/        Validation script and its SQL checks
+```
+
+Each folder has its own README that explains its contents:
+
+- [docs/](docs/README.md)
+- [scripts/](scripts/README.md)
+- [validation/](validation/README.md)
