@@ -118,7 +118,35 @@ FROM gap_from_last_month gm RIGHT JOIN EMPLOYEES e ON gm.employee_id=e.employee_
 ORDER BY e.employee_id
 */
 
+--KPI 1: Manager approval rate
+/*
+SELECT r.manager_id,e.employee_name,e.employee_role,
+COUNT(r.review_id) AS total_reviews,
+SUM(CASE WHEN r.result_of_review='Approved' THEN 1 ELSE 0 END) AS total_approved,
+(SUM(CASE WHEN r.result_of_review='Approved' THEN 1 ELSE 0 END)*100.0)/COUNT(*) AS approved_rate,
+(ROW_NUMBER() OVER(ORDER BY (SUM(CASE WHEN r.result_of_review='Approved' THEN 1 ELSE 0 END)*100.0)/COUNT(*) DESC
+                    )) AS rank
+FROM REVIEWS r RIGHT JOIN EMPLOYEES e ON r.manager_id=e.employee_id
+WHERE e.employee_role='Manager'
+GROUP BY r.manager_id,e.employee_name,e.employee_role
+*/
 
+--KPI 2: Project share of total hours
+WITH CTE AS (
+    SELECT p.project_id,p.project_name,
+    SUM(CASE WHEN tr.hours_spent IS NOT NULL THEN tr.hours_spent ELSE 0 END) AS total_hours_per_project
+    FROM PROJECTS p LEFT JOIN TASKS t ON p.project_id=t.project_id
+    JOIN TASK_RECORD_BY_ENGINEER tr ON t.task_id=tr.task_id
+    GROUP BY p.project_id,p.project_name
+),
+total_hours_rate AS (
+SELECT *,
+(c.total_hours_per_project*100.0/SUM(c.total_hours_per_project) OVER())AS rate_per_project
+FROM CTE c
+)
 
+SELECT *,
+ROW_NUMBER() OVER(ORDER BY th.rate_per_project DESC) rank
+FROM total_hours_rate th
 
 
